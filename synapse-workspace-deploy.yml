@@ -1,0 +1,45 @@
+name: Synapse Workspace Deployment
+
+on:
+  push:
+    branches:
+      - develop
+      
+  workflow_dispatch:
+    inputs:
+      subscription-id:
+        description: 'Azure Subscription ID'
+        required: true
+      subscription-name:
+        description: 'Azure Subscription Name'
+        required: true
+      resource-group-name:
+        description: 'Resource Group Name'
+        required: true
+      synapse-workspace-name:
+        description: 'Synapse Workspace Name'
+        required: true
+
+jobs:
+  build:
+    runs-on: DevOpsAgent-DataSolutions
+    steps:
+    - name : Checkout
+      uses: actions/checkout@v2
+    
+    - name :  'NonProd Validate and Deploy'
+      uses: Azure/Synapse-workspace-deployment@V1.9.0
+      with:
+        TargetWorkspaceName: 'syn-n-dss-synapseeng01'
+        ArtifactsFolder: ${{ github.workspace }}/synapse
+        TemplateFile: './TemplateForWorkspace.json'
+        ParametersFile: './TemplateParametersForWorkspace.json'
+        OverrideArmParameters: ./deployment/parameters/parameters.yaml
+        environment: 'Azure Public'
+        resourceGroup: 'rg-n-dss-dataengineering01'
+        clientId: '029aec5e-20e2-4fbf-a21e-867cbb48444c'
+        clientSecret: ${{ secrets.NONPROD_CLIENTSECRET }}
+        subscriptionId: '5bb9495d-fa86-4cc4-93ac-4b3226c76ac3' 
+        tenantId: '3af4d585-fa21-49aa-a779-5a476c01a465'
+        operation: 'validateDeploy'
+        
